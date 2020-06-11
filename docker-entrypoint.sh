@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# https://wiki.netxms.org/wiki/Server_Configuration_File
-
 conf=/data/netxmsd.conf
 db_path=/data/netxms.db
 log_file=/data/netxms.log
@@ -9,8 +7,7 @@ data_directory=/data/netxms
 predefined_templates=/data/predefined-templates
 
 
-if [ ! -f "${conf}" ];
-then
+if [ ! -f "${conf}" ]; then
     echo "Generating NetXMS server config file ${conf}"
     cat > ${conf} <<EOL
 DBDriver=sqlite.ddr
@@ -21,6 +18,7 @@ DebugLevel = 7
 CreateCrashDumps = yes
 ${SERVER_CONFIG}
 EOL
+fi
 
 [ ! -d "${data_directory}" ] && cp -ar /var/lib/netxms/ ${data_directory}
 [ ! -d "${predefined_templates}" ]  && cp -ar /usr/share/netxms/default-templates/ ${predefined_templates}
@@ -45,4 +43,6 @@ if [ "$DEBUG_LEVEL" -gt 0 ]; then
     debug_level="-D ${DEBUG_LEVEL}"
 fi
 
-exec /usr/bin/netxmsd -q ${debug_level} -c ${conf}
+/usr/bin/netxmsd -q ${debug_level} -c ${conf}
+
+
