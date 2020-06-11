@@ -22,10 +22,6 @@ CreateCrashDumps = yes
 ${SERVER_CONFIG}
 EOL
 
-if [ 
-
-fi
-
 [ ! -d "${data_directory}" ] && cp -ar /var/lib/netxms/ ${data_directory}
 [ ! -d "${predefined_templates}" ]  && cp -ar /usr/share/netxms/default-templates/ ${predefined_templates}
 [ ! -f "${db_path}" ] && { echo "Initializing NetXMS SQLLite database"; nxdbmgr -c ${conf} init /usr/share/netxms/sql/dbinit_sqlite.sql; }
