@@ -2,47 +2,35 @@
 
 # https://wiki.netxms.org/wiki/Server_Configuration_File
 
-netxmsd_conf=/data/netxmsd.conf
-netxmsd_db_path=/data/netxms.db
-netxmsd_log_file=/data/netxms.log
-netxmsd_data_directory=/data/netxms
-netxmsd_predefined_templates=/data/predefined-templates
+conf=/data/netxmsd.conf
+db_path=/data/netxms.db
+log_file=/data/netxms.log
+data_directory=/data/netxms
+predefined_templates=/data/predefined-templates
 
-if [ ! -f "${netxmsd_conf}" ];
+
+if [ ! -f "${conf}" ];
 then
-    echo "Generating NetXMS server config file ${netxmsd_conf}"
-    cat > ${netxmsd_conf} <<EOL
+    echo "Generating NetXMS server config file ${conf}"
+    cat > ${conf} <<EOL
 DBDriver=sqlite.ddr
-DBName=${netxmsd_db_path}
-Logfile=${netxmsd_log_file}
-DataDirectory=${netxmsd_data_directory}
-${NXSERVER_CONFIG}
+DBName=${db_path}
+Logfile=${log_file}
+DataDirectory=${data_directory}
+DebugLevel = 7
+CreateCrashDumps = yes
+${SERVER_CONFIG}
 EOL
 
+if [ 
+
 fi
 
-if [ ! -d "${netxmsd_data_directory}" ]; then
-    cp -ar /var/lib/netxms/ ${netxmsd_data_directory}
-fi
-
-if [ ! -d "${netxmsd_predefined_templates}" ]; then
-    cp -ar /usr/share/netxms/default-templates/ ${netxmsd_predefined_templates}
-fi
-
-if [ ! -f "${netxmsd_db_path}" ]; then
-    echo "Initializing NetXMS SQLLite database"
-    nxdbmgr -c ${netxmsd_conf} init /usr/share/netxms/sql/dbinit_sqlite.sql
-fi
-
-if [ "${NXSERVER_UNLOCK_ON_STARTUP}" -gt 0 ]; then
-    echo "Unlocking database"
-    echo "Y" | nxdbmgr -c ${netxmsd_conf} unlock
-fi
-
-if [ "${NXSERVER_UPGRADE_ON_STARTUP}" -gt 0 ]; then
-    echo "Upgrading database"
-    nxdbmgr ${NXSERVER_UPGRADE_PARAMS} -c ${netxmsd_conf} upgrade
-fi
+[ ! -d "${data_directory}" ] && cp -ar /var/lib/netxms/ ${data_directory}
+[ ! -d "${predefined_templates}" ]  && cp -ar /usr/share/netxms/default-templates/ ${predefined_templates}
+[ ! -f "${db_path}" ] && { echo "Initializing NetXMS SQLLite database"; nxdbmgr -c ${conf} init /usr/share/netxms/sql/dbinit_sqlite.sql; }
+[ "${UNLOCK_ON_STARTUP}" -gt 0 ] && { echo "Unlocking database"; echo "Y" | nxdbmgr -c ${conf} unlock; }
+[ "${UPGRADE_ON_STARTUP}" -gt 0 ] && { echo "Upgrading database"; nxdbmgr ${UPGRADE_PARAMS} -c ${conf} upgrade; }
 
 # Usage: netxmsd [<options>]
 # 
@@ -56,9 +44,9 @@ fi
 #    -q          : Disable interactive console
 #    -v          : Display version and exit
 
-netxmsd_debug_level=""
-if [ "$NXSERVER_DEBUG_LEVEL" -gt 0 ]; then
-    netxmsd_debug_level="-D ${NXSERVER_DEBUG_LEVEL}"
+debug_level=""
+if [ "$DEBUG_LEVEL" -gt 0 ]; then
+    debug_level="-D ${DEBUG_LEVEL}"
 fi
 
-exec /usr/bin/netxmsd -q ${netxmsd_debug_level} -c ${netxmsd_conf}
+exec /usr/bin/netxmsd -q ${debug_level} -c ${conf}
