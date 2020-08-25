@@ -1,2 +1,2 @@
 # netxml-server
-NetXMS Server 3.3.350
+NetXMS Server 3.4.313
