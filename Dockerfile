@@ -1,7 +1,11 @@
 FROM debian:stretch
 MAINTAINER Ibere Luiz Di Tizio Junior <ibere.tizio@gmail.com>
 
+<<<<<<< HEAD
 ARG VERSION_SERVER=3.5.90-1
+=======
+ARG VERSION_SERVER=3.4.313-1
+>>>>>>> cb294d435b4dd90284f18fae34d318602ebcc56f
 
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections && apt-get update && \
     apt-get install -y --no-install-recommends gnupg2 apt-transport-https ca-certificates procps curl netcat sqlite3 locales && \
