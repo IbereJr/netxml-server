@@ -1,7 +1,7 @@
 #!/bin/bash
 
 conf=/data/netxmsd.conf
-db_path=/data/netxms.db
+db_path=/data/Init-DB
 log_file=/data/netxms.log
 data_directory=/data/netxms
 predefined_templates=/data/predefined-templates
@@ -25,7 +25,7 @@ fi
 
 [ ! -d "${data_directory}" ] && cp -ar /var/lib/netxms/ ${data_directory}
 [ ! -d "${predefined_templates}" ]  && cp -ar /usr/share/netxms/default-templates/ ${predefined_templates}
-[ ! -f "${db_path}" ] && { echo "Initializing NetXMS SQLLite database"; nxdbmgr -c ${conf} init /usr/share/netxms/sql/dbinit_mysql.sql; }
+[ -f "${db_path}" ] && { echo "Initializing NetXMS database"; nxdbmgr -c ${conf} init /usr/share/netxms/sql/dbinit_mysql.sql; rm -f "${db_path}";  }
 [ "${UNLOCK_ON_STARTUP}" -gt 0 ] && { echo "Unlocking database"; echo "Y" | nxdbmgr -c ${conf} unlock; }
 [ "${UPGRADE_ON_STARTUP}" -gt 0 ] && { echo "Upgrading database"; nxdbmgr ${UPGRADE_PARAMS} -c ${conf} upgrade; }
 
