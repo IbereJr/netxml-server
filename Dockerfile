@@ -1,22 +1,21 @@
-FROM centos:centos7
+FROM debian:buster
 MAINTAINER Ibere Luiz Di Tizio Junior <ibere.tizio@gmail.com>
 
 ARG VERSION_SERVER=3.5.90-1
 
-RUN yum -y update
-RUN yum groupinstall "Development Tools" -y    
-RUN yum install wget openssl openssl-devel -y
-RUN curl -O https://www.netxms.org/download/releases/3.5/netxms-3.5.90.tar.gz
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections && apt-get update && \
+    apt-get install -y --no-install-recommends gnupg2 apt-transport-https ca-certificates procps curl vim netcat locales && \
+    sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && locale-gen && dpkg-reconfigure --frontend noninteractive locales && \
+    apt-get -qq clean
 
-RUN tar zxvf netxms-3.5.90.tar.gz
-WORKDIR /netxms-3.5.90
-RUN yum install libcurl libcurl-devel libssh libssh-devel -y
-RUN yum install epel-release  -y
-RUN yum install mosquitto mosquitto-devel  -y
-RUN ./configure --with-server --with-sqlite --with-agent
-
-RUN make
-RUN make install
+RUN curl -sL http://packages.netxms.org/netxms.gpg | apt-key add - && \
+    echo "deb http://packages.netxms.org/debian/ buster main" > /etc/apt/sources.list.d/netxms.list && \
+    apt-get update && apt-get -y install libssl1.1 libzmq5 &&  \
+    apt-get -y install netxms-server=$VERSION_SERVER netxms-dbdrv-mysql=$VERSION_SERVER && \
+    apt-get clean && \
+    curl -O https://www.netxms.org/download/releases/3.5/nxshell-3.5.90.jar && \
+    mkdir -p /usr/share/netxms/default-templates && \
+    mv /usr/share/netxms/templates/* /usr/share/netxms/default-templates/
 
 ENV LANG=en_US.UTF-8 \
     LANGUAGE=en_US \
@@ -27,11 +26,11 @@ ENV LANG=en_US.UTF-8 \
 
 VOLUME /data
 
-EXPOSE 4701
+EXPOSE 4701 4703
 EXPOSE 514/udp
 
-COPY ./docker-entrypoint.sh ./wait-for /
+COPY ./docker-entrypoint.sh  /
 
-RUN  chmod 755 /docker-entrypoint.sh && chmod 755 /wait-for
+RUN  chmod 755 /docker-entrypoint.sh 
 
 CMD ["/docker-entrypoint.sh"]
