@@ -1,7 +1,8 @@
 FROM debian:buster
 MAINTAINER Ibere Luiz Di Tizio Junior <ibere.tizio@gmail.com>
 
-#ARG VERSION_SERVER=3.6.252
+ARG VERSION_SERVER=3.6.252
+ARG VERSION_DIR=3.6
 
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections && apt-get update && \
     apt-get install -y --no-install-recommends gnupg2 apt-transport-https ca-certificates procps curl vim netcat locales snmp && \
@@ -11,9 +12,9 @@ RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selectio
 RUN curl -sL http://packages.netxms.org/netxms.gpg | apt-key add - && \
     echo "deb http://packages.netxms.org/debian/ buster main" > /etc/apt/sources.list.d/netxms.list && \
     apt-get update && apt-get -y install libssl1.1 libzmq5 &&  \
-    apt-get -y install netxms-server=3.6.252-1 netxms-dbdrv-mysql=3.6.252-1 && \
+    apt-get -y install netxms-server=${VERSION_SERVER}-1 netxms-dbdrv-mysql=${VERSION_SERVER}-1 && \
     apt-get clean && \
-    curl -O https://www.netxms.org/download/releases/3.6/nxshell-3.6.252.jar && \
+    curl -O https://www.netxms.org/download/releases/${VERSION_DIR}/nxshell-${VERSION_SERVER}.jar && \
     mkdir -p /usr/share/netxms/default-templates && \
     mv /usr/share/netxms/templates/* /usr/share/netxms/default-templates/
 
